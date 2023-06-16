@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -60,7 +62,14 @@ public class EmployeeController {
         return R.success("退出成功");
     }
 
-    // 员工分页查询
+    /**
+     * 员工分页查询
+     *
+     * @param page     页码
+     * @param pageSize 一页条数
+     * @param name     名字
+     * @return
+     */
     @GetMapping("/page")
     public R<Page> page(int page, int pageSize, String name) {
         log.info("page = {},pageSize = {},name = {}", page, pageSize, name);
@@ -81,5 +90,24 @@ public class EmployeeController {
         employeeService.page(pageInfo, queryWrapper);
 
         return R.success(pageInfo);
+    }
+
+    @PostMapping()
+    public R<String> save(HttpServletRequest request, @RequestBody Employee employee) {
+        log.info("新增员工，员工信息：{}", employee.toString());
+        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
+
+        employee.setCreateTime(LocalDateTime.now());
+        employee.setUpdateTime(LocalDateTime.now());
+
+        // 获取当前登录用户的id
+        Long empId = (Long) request.getSession().getAttribute("employee");
+
+        employee.setCreateUser(empId);
+        employee.setUpdateUser(empId);
+
+        employeeService.save(employee);
+
+        return R.success("新增成功");
     }
 }
