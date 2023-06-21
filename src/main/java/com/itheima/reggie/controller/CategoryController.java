@@ -56,13 +56,17 @@ public class CategoryController {
     /**
      * 根据id删除分类
      *
-     * @param id
+     * @param ids
      * @return
      */
     @DeleteMapping()
-    public R<String> delete(Long id) {
-        log.info("删除分类，id为：{}", id);
-        categoryService.removeById(id);
+    public R<String> delete(Long ids) {
+        log.info("删除分类，id为：{}", ids);
+        // categoryService.removeById(id);
+
+        // 再删除前需要先判断
+        categoryService.remove(ids);
+
         return R.success("删除分类成功");
     }
 
