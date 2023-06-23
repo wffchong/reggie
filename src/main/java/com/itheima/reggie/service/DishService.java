@@ -6,4 +6,6 @@ import com.itheima.reggie.entity.Dish;
 
 public interface DishService extends IService<Dish> {
     void saveWithFlavor(DishDto dishDto);
+
+    DishDto getByIdWithFlavor(Long id);
 }
