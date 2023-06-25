@@ -108,5 +108,24 @@ public class DishController {
         return R.success("修改菜品成功");
     }
 
+    @DeleteMapping()
+    public R<String> delete(String[] ids) {
+        for (String id : ids) {
+            dishService.removeById(id);
+        }
+
+        return R.success("删除菜品成功");
+    }
+
+    @PostMapping("/status/{state}")
+    public R<String> sale(@PathVariable int state, String[] ids) {
+        for (String id : ids) {
+            Dish dish = dishService.getById(id);
+            dish.setStatus(state);
+            dishService.updateById(dish);
+        }
+
+        return R.success("起售菜品成功");
+    }
 
 }
