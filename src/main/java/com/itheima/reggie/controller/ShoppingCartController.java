@@ -61,6 +61,7 @@ public class ShoppingCartController {
 
     /**
      * 查看购物车
+     *
      * @return
      */
     @GetMapping("/list")
@@ -75,5 +76,22 @@ public class ShoppingCartController {
         List<ShoppingCart> list = shoppingCartService.list(queryWrapper);
 
         return R.success(list);
+    }
+
+    /**
+     * 清空购物车
+     */
+    @DeleteMapping("/clean")
+    public R<String> clear() {
+        // SQL:delete from shopping_cart where user_id = ?
+        Long currentUserId = BaseContext.getCurrentId();
+
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+
+        queryWrapper.eq(currentUserId != null, ShoppingCart::getUserId, currentUserId);
+
+        shoppingCartService.remove(queryWrapper);
+
+        return R.success("清空购物车成功");
     }
 }
