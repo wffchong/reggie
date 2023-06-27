@@ -54,6 +54,7 @@ public class ShoppingCartController {
             shoppingCart.setNumber(1);
             shoppingCart.setCreateTime(LocalDateTime.now());
             shoppingCartService.save(shoppingCart);
+            cartServiceOne = shoppingCart;
         }
         return R.success(cartServiceOne);
     }
