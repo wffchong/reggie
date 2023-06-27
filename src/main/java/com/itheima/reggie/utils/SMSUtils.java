@@ -21,7 +21,9 @@ public class SMSUtils {
      * @param param        参数
      */
     public static void sendMessage(String signName, String templateCode, String phoneNumbers, String param) {
+        // 只需要把accessKeyId和accessKeySecret换成自己的就可以了
         DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "", "");
+
         IAcsClient client = new DefaultAcsClient(profile);
 
         SendSmsRequest request = new SendSmsRequest();
