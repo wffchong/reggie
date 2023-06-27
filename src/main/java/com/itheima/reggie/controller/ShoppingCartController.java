@@ -7,12 +7,10 @@ import com.itheima.reggie.entity.ShoppingCart;
 import com.itheima.reggie.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -60,4 +58,22 @@ public class ShoppingCartController {
         return R.success(cartServiceOne);
     }
 
+
+    /**
+     * 查看购物车
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<ShoppingCart>> list() {
+        Long currentUserId = BaseContext.getCurrentId();
+
+        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+
+        queryWrapper.eq(currentUserId != null, ShoppingCart::getUserId, currentUserId);
+        queryWrapper.orderByAsc(ShoppingCart::getCreateTime);
+
+        List<ShoppingCart> list = shoppingCartService.list(queryWrapper);
+
+        return R.success(list);
+    }
 }
