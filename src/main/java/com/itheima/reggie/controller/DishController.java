@@ -18,6 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,7 @@ public class DishController {
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto) {
         log.info(dishDto.toString());
+
         dishService.saveWithFlavor(dishDto);
         return R.success("新增菜品成功");
     }
@@ -114,6 +116,15 @@ public class DishController {
     @PutMapping()
     public R<String> update(@RequestBody DishDto dishDto) {
         log.info(dishDto.toString());
+
+        // 清理redis中所有菜品的缓存数据
+        // Set keys = redisTemplate.keys("dish_*");
+        // redisTemplate.delete(keys);
+
+        // 精确清理某一个 菜品类 的缓存数据
+        String key = "dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus();
+        redisTemplate.delete(key);
+
 
         dishService.updateWithFlavor(dishDto);
         return R.success("修改菜品成功");
