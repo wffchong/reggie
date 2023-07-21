@@ -14,9 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,6 +34,9 @@ public class DishController {
 
     @Autowired
     private DishFlavorService dishFlavorService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto) {
@@ -153,7 +158,26 @@ public class DishController {
 
         List<Dish> list = dishService.list(lambdaQueryWrapper);
 
-        List<DishDto> dishDtoList = list.stream().map((item) -> {
+
+        List<DishDto> dishDtoList = null;
+
+        // 动态构造Key
+        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
+
+        // 先从redis中获取缓存数据
+        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
+
+        log.info("dishDtoList", dishDtoList);
+
+        if (dishDtoList != null) {
+            // 如果存在，则直接返回，无需查询数据库
+            System.out.println(1234);
+            return R.success(dishDtoList);
+        }
+        System.out.println(12345);
+
+
+        dishDtoList = list.stream().map((item) -> {
             DishDto dishDto = new DishDto();
 
             BeanUtils.copyProperties(item, dishDto);
@@ -174,6 +198,9 @@ public class DishController {
             dishDto.setFlavors(dishFlavorlist);
             return dishDto;
         }).collect(Collectors.toList());
+
+        // 如果不存在，则查询数据库，并且将查询到的菜品数据添加到缓存中
+        redisTemplate.opsForValue().set(key, dishDtoList, 60, TimeUnit.MINUTES);
 
         return R.success(dishDtoList);
     }
